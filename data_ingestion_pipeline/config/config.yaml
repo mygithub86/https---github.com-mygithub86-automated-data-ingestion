@@ -1,0 +1,91 @@
+# Example configuration file for the data ingestion pipeline.
+# Customize with your actual settings.
+
+logging:
+  level: INFO
+  format: '%(asctime)s - %(levelname)s - %(name)s - %(message)s'
+  # file: logs/pipeline.log # Uncomment to log to a file
+
+oauth:
+  client_id_key: OAUTH_CLIENT_ID # Environment variable name for Client ID
+  client_secret_key: OAUTH_CLIENT_SECRET # Environment variable name for Client Secret
+  token_url: https://your_oauth_provider.com/token # Example Token URL
+
+extractors:
+  jira:
+    enabled: false
+    api_endpoint: https://your_jira_instance.atlassian.net
+    jql_query: 'project = "YOUR_PROJECT" AND status = Done'
+  confluence:
+    enabled: false
+    api_endpoint: https://your_confluence_instance.atlassian.net
+    space_keys:
+      - YOUR_SPACE_KEY
+  bitbucket:
+    enabled: false
+    api_endpoint: https://api.bitbucket.org/2.0 # Or your server URL
+    projects: # List of project_key/repo_slug pairs
+      - project_key: YOUR_WORKSPACE_OR_PROJECT
+        repo_slug: your_repo_name
+    file_types: ['.py', '.md', '.txt', '.java'] # File extensions to extract
+  servicenow:
+    enabled: false
+    instance_url: https://your_instance.service-now.com
+    tables:
+      - name: incident
+        fields: ["number", "short_description", "description", "work_notes", "sys_updated_on"]
+        query: "active=true^state=1"
+      - name: kb_knowledge
+        fields: ["number", "short_description", "text", "sys_updated_on"]
+        query: "workflow_state=published"
+  html:
+    enabled: false
+    urls:
+      - https://example.com/page1
+      - https://another-domain.org/docs
+    # content_selector: "#main-content" # Optional: CSS selector for specific content area
+
+pii_filtering:
+  enabled: false
+  method: regex # or 'spacy', 'presidio'
+  action: mask # or 'remove'
+  mask_placeholder: '[REDACTED_{label}]'
+  rules: # Regex keys (defined below) or NER labels (e.g., EMAIL_ADDRESS, PERSON)
+    - email
+    - phone
+  regex_patterns:
+    email: '\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b'
+    phone: '\b(?:\+?1[-.\s]?)?\(?\d{3}\)?[-.\s]?\d{3}[-.\s]?\d{4}\b'
+  # spacy_model: 'en_core_web_sm' # If using spacy method
+
+output:
+  save_text: true
+  text_output_dir: output/text
+  include_metadata_header: true
+  save_pdf: false # Set to true to enable PDF generation (requires implementation)
+  pdf_output_dir: output/pdf
+  # base_output_dir: output # Used by state management for archiving
+
+chunking:
+  strategy: fixed # 'fixed' or 'sentence' (requires nltk/spacy)
+  size: 1000 # Target chunk size (characters for fixed, approx tokens/sentences)
+  overlap: 100 # Overlap between chunks (characters for fixed)
+
+openai:
+  api_key_env_var: OPENAI_API_KEY # Environment variable name
+  embedding_model: text-embedding-ada-002
+  batch_size: 32 # How many chunks to embed per API call
+
+vector_database:
+  type: pinecone # 'pinecone', 'weaviate', 'chroma', 'qdrant' (ensure uploader implements it)
+  api_key_env_var: VECTOR_DB_API_KEY # Environment variable name
+  index_name: your-vector-index
+  # environment: us-west1-gcp # Specific to Pinecone
+  # create_index_if_not_exists: false # For Pinecone: attempt creation if index missing
+  # metric: cosine # For Pinecone: metric used for index creation
+  batch_size: 100 # How many vectors to upsert per call (depends on DB)
+  max_metadata_text_length: 1000 # Max length of 'text' field in metadata (DB limits)
+
+ingestion:
+  state_file: output/ingestion_state.log # Log processed files here
+  archive_directory: output/archive # Move processed files here after ingestion (optional) 

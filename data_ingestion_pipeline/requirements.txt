@@ -1,0 +1,25 @@
+requests>=2.25.0
+PyYAML>=5.4.0
+python-dotenv>=0.15.0
+openai>=0.27.0 # Check latest version compatibility
+# --- Choose ONE PDF library ---
+reportlab>=3.6.0
+# fpdf2>=2.5.0
+# --- Choose ONE PDF reading library ---
+pypdf2>=3.0.0 # Or PyPDF2 if using older versions
+# PyMuPDF>=1.18.0 # Requires fitz
+# --- HTML Parsing ---
+beautifulsoup4>=4.9.0
+lxml>=4.6.0
+# --- Optional PII/Chunking Libraries ---
+# spacy>=3.0.0
+# presidio-analyzer>=2.2.0
+# nltk>=3.6.0
+# --- Optional Vector DB Clients ---
+# pinecone-client>=2.2.0
+# weaviate-client>=3.15.0
+# chromadb>=0.3.0
+# qdrant-client>=1.1.0
+# --- Optional API Clients ---
+# python-jira>=3.0.0
+# atlassian-python-api>=3.0.0 
